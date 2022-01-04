@@ -34,7 +34,8 @@ func Handler(ctx context.Context, event events.S3Event) error {
 			return err
 		}
 		for _, body := range outputs {
-			if integrationClient.Post(ctx, body); err != nil {
+			err := integrationClient.Post(ctx, body)
+			if err != nil {
 				return err
 			}
 		}
