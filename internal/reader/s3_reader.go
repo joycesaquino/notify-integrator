@@ -17,8 +17,8 @@ type S3Reader struct {
 	dwl *s3manager.Downloader
 }
 
-func (sr S3Reader) NewUser(bytes []byte) *types.User {
-	var user *types.User
+func (sr S3Reader) NewUser(bytes []byte) *types.Body {
+	var user *types.Body
 	err := json.Unmarshal(bytes, &user)
 	if err != nil {
 		return nil
@@ -26,13 +26,13 @@ func (sr S3Reader) NewUser(bytes []byte) *types.User {
 	return user
 }
 
-func (sr S3Reader) Read(ctx context.Context, key string, bucketName string) ([]byte, error) {
+func (sr S3Reader) Download(ctx context.Context, key string, bucketName string) ([]byte, error) {
 	input := &s3.GetObjectInput{
 		Key:    aws.String(key),
 		Bucket: aws.String(bucketName),
 	}
 
-	temp, err := os.Create(filepath.Join(os.TempDir(), "temp.json"))
+	temp, err := os.Create(filepath.Join(os.TempDir(), "temp.csv"))
 	if err != nil {
 		return nil, err
 	}
@@ -40,15 +40,9 @@ func (sr S3Reader) Read(ctx context.Context, key string, bucketName string) ([]b
 	_, err = sr.dwl.DownloadWithContext(ctx, temp, input)
 	if err != nil {
 		return nil, err
-
-	}
-	bytes, err := ioutil.ReadAll(temp)
-	if err != nil {
-		return nil, err
 	}
 
-	return bytes, nil
-
+	return ioutil.ReadAll(temp)
 }
 
 func NewS3Reader(session *session.Session) *S3Reader {
