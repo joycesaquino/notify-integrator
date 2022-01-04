@@ -1,9 +1,12 @@
 package client
 
 import (
+	"context"
+	"fmt"
 	"github.com/caarlos0/env/v6"
 	"github.com/go-resty/resty/v2"
 	"log"
+	"notify-integrator/internal/types"
 	"time"
 )
 
@@ -16,8 +19,29 @@ type IntegrationClient struct {
 	restyClient *resty.Client
 }
 
-func Post() {
+const (
+	contentTypeHeader = "Content-Type"
+	contentTypeJson   = "application/json"
+)
 
+func (client IntegrationClient) Post(ctx context.Context, body types.Body) error {
+
+	resp, err := client.restyClient.
+		R().
+		SetContext(ctx).
+		SetHeader(contentTypeHeader, contentTypeJson).
+		SetBody(body).
+		Post("/hubs")
+
+	if err != nil {
+		return err
+	}
+
+	if resp.IsError() {
+		return fmt.Errorf("[ERROR] - StatusCode : %d , Error n: %s", resp.StatusCode(), err)
+	}
+
+	return nil
 }
 
 func NewClient() *IntegrationClient {
