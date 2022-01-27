@@ -31,7 +31,7 @@ func (client IntegrationClient) Post(ctx context.Context, body types.Body) error
 		SetContext(ctx).
 		SetHeader(contentTypeHeader, contentTypeJson).
 		SetBody(body).
-		Post("/hubs")
+		Post("/api-endpoint")
 
 	if err != nil {
 		return err
